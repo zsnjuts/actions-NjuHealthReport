@@ -20,10 +20,15 @@ if __name__ == '__main__':
         logging.info("超出填报日期")
         exit(-1)
     # retry mechanism
+    last_ex = None
     for _ in range(5):
         try:
             spider.main(config.data['username'], config.data['password'], config.data['location'])
             break
         except Exception as e:
+            last_ex = e
             logging.exception(e)
             time.sleep(5)
+    # 重试失败后，程序抛出异常，以便通过Github邮件通知用户
+    if last_ex is not None:
+        raise last_ex
